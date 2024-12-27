@@ -1,35 +1,53 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import "./App.css";
+import { useState } from "react";
+import ExpenseList from "./components/ExpenseList";
+import ExpenseFilter from "./components/ExpenseFilter";
+import ExpenseForm from "./components/ExpenseForm";
+import categories from "./categories";
+
+type Category = (typeof categories)[number];
+
+interface Expense {
+  id: number;
+  description: string;
+  amount: number;
+  category: Category;
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+
+  const handleDelete = (id: number) => {
+    setExpenses(expenses.filter((expense) => expense.id !== id));
+  };
+
+  const visibleExpenses = selectedCategory
+    ? expenses.filter((e) => e.category === selectedCategory)
+    : expenses;
+
+  const handleExpense = (expense: Expense) => {
+    setExpenses([...expenses, { ...expense }]);
+  };
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div className="mb-5">
+        <ExpenseForm onSubmit={(expense) => handleExpense(expense)} />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+
+      <div className="mb-3">
+        <ExpenseFilter
+          onSelectCategory={(category) => setSelectedCategory(category)}
+        ></ExpenseFilter>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+
+      <ExpenseList
+        expenses={visibleExpenses}
+        onDelete={(id) => handleDelete(id)}
+      ></ExpenseList>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
